@@ -1,0 +1,197 @@
+---
+title: "Classical Movie Searching"
+author: "Jadie Zuo"
+date: "April 4, 2016"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Set up
+```{r set-up,warning=FALSE}
+library("ggplot2")
+library("ggthemes")
+library("scales")
+library("plyr")
+library("grid")
+movie <- readRDS("products_100.RDS")
+movie1 <- readRDS("users_50.RDS")
+movie1$date <- as.Date(as.POSIXct(movie1$review_time,origin="1970-01-01"))
+movie$date <- as.Date(as.POSIXct(movie$review_time,origin="1970-01-01"))
+movie$year <- format(movie$date,'%Y')
+```
+
+Test 1
+```{r plot1}
+test1 <- movie[which(movie$product_productid == movie$product_productid[1]),]
+p <- ggplot(test1, aes(date, ..count..)) +
+  geom_histogram(binwidth = 80,color = "white") + theme_bw()
+p
+```
+
+Test 2
+```{r plot2}
+test2 <- movie[which(movie$product_productid == 
+                       movie$product_productid[dim(test1)[1]+1]),]
+pp <- ggplot(test2, aes(date, ..count..)) +
+  geom_histogram(binwidth = 80,color = "white") + theme_bw()
+pp
+```
+
+User 1
+```{r plot 3}
+user1 <- movie1[which(movie1$review_userid == movie1$review_userid[1]),]
+u <- ggplot(user1, aes(date, ..count..)) +
+  geom_histogram(binwidth = 80,color = "white") + theme_bw()
+u
+```
+
+User 2
+```{r plot4}
+user2 <- movie1[which(movie1$review_userid == movie1$review_userid[2]),]
+uu <- ggplot(user2, aes(date, ..count..)) +
+  geom_histogram(binwidth = 80,color = "white") + theme_bw()
+uu
+```
+
+Take a close look at test1
+```{r test1}
+test1$year <- format(test1$date,'%Y')
+test1$score <- rep("False",dim(test1)[1])
+for (i in 1:dim(test1)[1]) {
+  if (test1$review_score[i] > 3) {
+    test1$score[i] = "True"
+  }
+}
+GoodReview <- factor(test1$score)
+```
+Plot the review count by years
+```{r}
+ggplot(test1, aes(test1$year, fill=GoodReview)) + geom_bar()
+```
+Plot the proportion for reviews with 4 or more stars
+```{r}
+ggplot(test1, aes(x=test1$year)) + 
+  geom_bar(aes(fill=GoodReview), position="fill") + xlab("COUNT")
+```
+Plot review scores over years
+```{r score}
+mm <- ddply(test1, .(year), summarize, mean=mean(review_score))
+ggplot(mm, aes(x = factor(year), y = mean)) + geom_bar(stat = "identity")
+```
+
+```{r, include=FALSE}
+item_count = 0
+for (i in 1:9) {
+  if (i == 1) {
+    test1 <- movie[which(movie$product_productid == movie$product_productid[1]),]
+    item_count = item_count + dim(test1)[1]
+    names = 1
+  } else {
+    test <- movie[which(movie$product_productid == movie$product_productid[item_count + 1]),]
+    item_count = item_count + dim(test)[1]
+    names = c(names,item_count)
+  }
+}
+
+test1 <- movie[which(movie$product_productid == movie$product_productid[names[1]]),]
+p1 <- ggplot(test1, aes(date, ..count..))
+p1 <- p1 + geom_histogram(binwidth = 80, colour="white")
+
+test2 <- movie[which(movie$product_productid == movie$product_productid[names[2]]),]
+p2 <- ggplot(test2, aes(date, ..count..))
+p2 <- p2 + geom_histogram(binwidth = 80, colour="white")
+
+test3 <- movie[which(movie$product_productid == movie$product_productid[names[3]]),]
+p3 <- ggplot(test3, aes(date, ..count..))
+p3 <- p3 + geom_histogram(binwidth = 80, colour="white")
+
+test4 <- movie[which(movie$product_productid == movie$product_productid[names[4]]),]
+p4 <- ggplot(test4, aes(date, ..count..))
+p4 <- p4 + geom_histogram(binwidth = 80, colour="white")
+
+test5 <- movie[which(movie$product_productid == movie$product_productid[names[5]]),]
+p5 <- ggplot(test5, aes(date, ..count..))
+p5 <- p5 + geom_histogram(binwidth = 80, colour="white")
+
+test6 <- movie[which(movie$product_productid == movie$product_productid[names[6]]),]
+p6 <- ggplot(test6, aes(date, ..count..))
+p6 <- p6 + geom_histogram(binwidth = 80, colour="white")
+
+test7 <- movie[which(movie$product_productid == movie$product_productid[names[7]]),]
+p7 <- ggplot(test7, aes(date, ..count..))
+p7 <- p7 + geom_histogram(binwidth = 80, colour="white")
+
+test8 <- movie[which(movie$product_productid == movie$product_productid[names[8]]),]
+p8 <- ggplot(test8, aes(date, ..count..))
+p8 <- p8 + geom_histogram(binwidth = 80, colour="white")
+
+test9 <- movie[which(movie$product_productid == movie$product_productid[names[9]]),]
+p9 <- ggplot(test9, aes(date, ..count..))
+p9 <- p9 + geom_histogram(binwidth = 80, colour="white")
+
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+  
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+  
+  numPlots = length(plots)
+  
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+  
+  if (numPlots==1) {
+    print(plots[[1]])
+    
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+    
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+      
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+mm1 <- ddply(test1, .(year), summarize, mean=mean(review_score))
+mm2 <- ddply(test2, .(year), summarize, mean=mean(review_score))
+mm3 <- ddply(test3, .(year), summarize, mean=mean(review_score))
+mm4 <- ddply(test4, .(year), summarize, mean=mean(review_score))
+mm5 <- ddply(test5, .(year), summarize, mean=mean(review_score))
+mm6 <- ddply(test6, .(year), summarize, mean=mean(review_score))
+mm7 <- ddply(test7, .(year), summarize, mean=mean(review_score))
+mm8 <- ddply(test8, .(year), summarize, mean=mean(review_score))
+mm9 <- ddply(test9, .(year), summarize, mean=mean(review_score))
+g1 <- ggplot(mm1, aes(x = factor(year), y = mean)) + geom_bar(stat = "identity")
+g2 <- ggplot(mm2, aes(x = factor(year), y = mean)) + geom_bar(stat = "identity")
+g3 <- ggplot(mm3, aes(x = factor(year), y = mean)) + geom_bar(stat = "identity")
+g4 <- ggplot(mm4, aes(x = factor(year), y = mean)) + geom_bar(stat = "identity")
+g5 <- ggplot(mm5, aes(x = factor(year), y = mean)) + geom_bar(stat = "identity")
+g6 <- ggplot(mm6, aes(x = factor(year), y = mean)) + geom_bar(stat = "identity")
+g7 <- ggplot(mm7, aes(x = factor(year), y = mean)) + geom_bar(stat = "identity")
+g8 <- ggplot(mm8, aes(x = factor(year), y = mean)) + geom_bar(stat = "identity")
+g9 <- ggplot(mm9, aes(x = factor(year), y = mean)) + geom_bar(stat = "identity")
+
+```
+
+Trend plot for the first 9 movies
+```{r}
+multiplot(p1,p2,p3,p4,p5,p6,p7,p8,p9,cols = 3)
+multiplot(g1,g2,g3,g4,g5,g6,g7,g8,g9,cols = 3)
+```
+
+
