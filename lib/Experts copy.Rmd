@@ -314,3 +314,27 @@ plot(net.new, vertex.size=20/V(net.new)$type, edge.arrow.size=0, edge.curved=0,
      vertex.color=colrs[V(net.new)$type], vertex.frame.color="black",
      vertex.label=NA, layout=l)
 ```
+
+Exam the involvement of experts in the system:
+```{r}
+plot(table(link$to),xlab="Experts ID (101-200)", ylab="Frequency")
+length(order(table(link$to)))
+#There are 80 experts out of 100 recommended to the deviated reviewers.  
+#Print 10 most advanced expters
+table(link$to)[order(table(link$to))[71:80]]
+```
+
+Who are they?
+```{r}
+adv <- exp[c(93,63,64,67,91,43,75,90,92,83),c(2:6)]
+adv
+colMeans(adv)
+exp_sub <- exp[,c(2:6)]
+colMeans(exp_sub)
+```
+1. Average number of reviews for movies is considerable high than the experts popylation  
+---> No surprise  
+2. Average review scores for the 10 advanced experts is lower than the experts population  
+---> More critical?  
+3. Deviation of the 10 advanced experts is higher than the experts population  
+---> Professional perspective?
