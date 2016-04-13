@@ -1,0 +1,16 @@
+---
+title: "Testing Framework"
+author: "Juan Pablo Campos Gutierrez"
+date: "13 April 2016"
+output: pdf_document
+---
+
+The testing framework is based on a testing sample. The following table can illustrate the main idea. 
+
+Insert image
+
+This table is created for each method and the average score for all movies is obtained. The results are presented in the following table:
+
+
+
+
