@@ -1,7 +1,5 @@
 ---
 title: "Testing Framework"
-author: "Juan Pablo Campos Gutierrez"
-date: "13 April 2016"
 output: pdf_document
 ---
 

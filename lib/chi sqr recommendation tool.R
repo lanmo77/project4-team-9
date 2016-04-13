@@ -111,9 +111,31 @@ bridge.test <- function(data.base,x){
   test.average(data.base,b1, b2)
 }
 
-average.for.all <- function(movie.pairs,data.base){
+deleting.repeated <- function(recommend,name){
+  recommend <- recommend[order(recommend$chi,decreasing = T),]
+  recommend_new <- recommend[1,1]
+  for (i in 2:nrow(recommend)) {
+    new <- strsplit(recommend[i,1],"")[[1]]
+    old <- strsplit(recommend_new[length(recommend_new)],"")[[1]]
+    if (sum(new[1:4]==old[1:4])<4) {
+      recommend_new <- c(recommend_new, recommend[i,1])
+    }
+  }
+  old <- strsplit(name,"")[[1]]
   
+  recommend_new_final <- NULL
+  for (j in 1:length(recommend_new)) {
+    new <- strsplit(recommend_new[j],"")[[1]]
+    if (sum(new[1:4]==old[1:4])<4) {
+      recommend_new_final <- c(recommend_new_final, recommend_new[j])
+    }
+  }
+  output <- data.frame(name2=recommend_new_final)
+  output <- merge(output,recommend,by.x="name2")
+  output <- output[order(output$chi,decreasing = T),]
+  return(output)
 }
+
 
 ##    COMPUTE CHI-SQ FOR EVERY PAIR OF MOVIES
 ##________________________________________________________________________________________
@@ -145,24 +167,49 @@ movie.pairs.train <- subset(movie.pairs.train,movie1!=movie2)
 t0 <- proc.time()
 chi.raw <- chi.for.all(movie.pairs.train,training)
 proc.time()-t0
+# write.csv(chi.raw,"/Users/JPC/Documents/Chi_raw_delete.csv")
 
 names(chi.raw)[3] <- "chi"
 chi <- chi.raw [!is.na(chi.raw$chi),]
-max.chi <- max(chi$chi)
-chi$distance <- max.chi-chi$chi
+# max.chi <- max(chi$chi)
+# chi$distance <- max.chi-chi$chi
 # chi[order(chi$chi,decreasing = T),]
 
-distances.names <- chi[,-4]
-distances.names <- distances.names[order(distances.names$chi,decreasing = T),]
+
+PairChi <- chi[order(chi$chi,decreasing = T),]
 temp.names <- movie.names
 names(temp.names)[1] <- "movie1"
-distances.names <- merge(distances.names,temp.names,by.x = "movie1")
-names(distances.names)[4] <- "name1"
+PairChi <- merge(PairChi,temp.names,by.x = "movie1")
+names(PairChi)[4] <- "name1"
 temp.names <- movie.names
 names(temp.names)[1] <- "movie2"
-distances.names <- merge(distances.names,temp.names,by.x = "movie2")
-names(distances.names)[5] <- "name2"
-distances.names <- distances.names[,c("name1","name2","movie1","movie2","chi")]
+PairChi <- merge(PairChi,temp.names,by.x = "movie2")
+names(PairChi)[5] <- "name2"
+PairChi <- PairChi[,c("name1","name2","movie1","movie2","chi")]
+save(PairChi,file = "/Users/JPC/Documents/Columbia/2nd Semester/1. Applied Data Science/2. Homeworks/Project 4/project4-team-8/data/PairChi.RData")
+
+
+
+##    RECOMMENDATION FUNCTION
+##________________________________________________________________________________________
+##________________________________________________________________________________________
+
+chi.sqr.recommendation <- function(movie,number){
+  temp.distance <- PairChi[PairChi$movie1==movie,]
+  temp.distance <- temp.distance[order(temp.distance$chi,decreasing = T),c("name2","chi")]
+  temp.distance <- deleting.repeated(recommend = temp.distance,name = return.name("B0093ICOE0"))
+  return(head(temp.distance,number))
+}
+
+return.name(products[2])
+chi.sqr.recommendation(products[2],5)
+
+return.name(products[3])
+chi.sqr.recommendation(products[3],5)
+
+
+return.name("B0093ICOE0")
+chi.sqr.recommendation("B0093ICOE0",20)
 
 ##    COMPUTE TEST METRICS 
 ##________________________________________________________________________________________
@@ -174,26 +221,5 @@ distances.names <- distances.names[,c("name1","name2","movie1","movie2","chi")]
 t0 <- proc.time()
 test.averages <- ddply(.data = movie.pairs.train,.variables = .(movie1,movie2),.fun = function(x) bridge.test(test,x),.progress="text")
 proc.time()-t0
-
-
-##    RECOMMENDATION TOOL
-##________________________________________________________________________________________
-##________________________________________________________________________________________
-
-top.similar <- function(movie,number){
-  temp.distance <- distances.names[distances.names$movie1==movie,]
-  temp.distance <- temp.distance[order(temp.distance$chi,decreasing = T),c("name2","chi")]
-  return(head(temp.distance,number))
-}
-
-return.name("B00004TX12")
-top.similar(products[1],5)
-
-return.name(products[2])
-top.similar(products[2],5)
-
-return.name(products[3])
-top.similar(products[3],5)
-
-
+write.csv(test.averages,"/Users/JPC/Documents/Columbia/2nd Semester/1. Applied Data Science/2. Homeworks/Project 4/project4-team-8/data/PairChi.csv")
 
