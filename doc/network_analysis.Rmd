@@ -1,9 +1,14 @@
 ---
-title: "Data Analysis and Recommendation Algorithms"
-author: "Group6"
+title: "Recommendation Algorithms and Evaluation"
+author: "Group8"
 date: "April 12, 2016"
 output: html_document
 ---
+
+* Social Network Analysis & Clustering
+* Biclustering Analysis
+* Chi-Square Analysis
+* Model Evaluation
 
 ```{r setup, include=FALSE}
 library(igraph)
@@ -22,16 +27,19 @@ imovie_mode <- simplify(imovie_mode)
 
 ```
 
-## Social Network Analysis & Cluster
+#1 Social Network Analysis & Cluster
   In order to better understand movie-user biparite network, the following parts fisrt visualize a sample biparite network and show some primary characteristics. Then by converting the biparite network to one-mode movie network, we can have a deeper understanding on movie grouping. Furthermore, based on the idea of movie grouping, we introduced fast greedy algorithm to deal with our large-scale network. And finally we are able to reach our movie recommendation system.
   
-#Biparite Network:
+##1.1 Biparite Network:
 
 ```{r movie-user beparite network}
 whole_data <- readRDS('data_use.RDS')
 df1 <- data.frame( user=whole_data[1:2000,]$review_userid, movie=whole_data[1:2000,]$product_name, stringsAsFactors = F)
 m1 <- table( df1 )
 user_movie1 <- as.matrix( m1 )
+
+oldw <- getOption("warn")
+options(warn = -1)
 
 i2mode<-graph.incidence(user_movie1, mode=c('all'))
 V(i2mode)$color[1:1150] <- rgb(1,0,0,.5)
@@ -56,13 +64,15 @@ V(i2mode)$size[1:427] <- 2
 E(i2mode)$width <- .3
 E(i2mode)$color <- rgb(.5,.5,0,.1)
 
+options(warn = oldw)
+
 plot(i2mode, layout=layout.fruchterman.reingold)
 
 ```
   This is a small sample biparite network. Green node means moive. Red node means reviewer. Edge means there is a review from a reviewer to a movie.
   The position can show the closeness of movies in some sense.
 
-# One-Mode Movie Network
+##1.2 One-Mode Movie Network
 ```{r movie network grouped by the number of common reviewers}
 ##########movie overlap
 
@@ -79,7 +89,6 @@ V(magallg)$degree <- degree(magallg)
 # Betweenness centrality
 V(magallg)$btwcnt <- betweenness(magallg)
 
-plot(density(olmovie))
 
 magall<-olmovie
 
@@ -119,7 +128,7 @@ plot(magallggt1)
   This network is One-Mode Movie Network, which also shows a strong overlap of reivewers between two movies. If there is an arrow from movie A to movie B, at least 20% of reviewers of movie A also have given reviews to movie B. This phenomenon can indicate that we can recommend movie B to the audience of movie A.
   This method is meaningful but pretty slow. Thus we need to apply other methods with the similar idea.
 
-# Community Dection:
+##1.3 Community Dection:
 
 Faster Greedy Algorithm tries to find dense subgraph, also called communities in graphs via directly optimizing a modularity score. Modularity designed to measure the strength of division of a network into modules. Networks with high modularity have dense connections between the nodes within modules but sparse connections between nodes in different modules.  
 
@@ -144,8 +153,9 @@ plot(fc, imovie_mode, col = rgb(0,0,0,0),mark.groups = communities(fc), edge.col
 sizes(fc)
 ```
 
-# Recomendation Algorithm 1:
-  This recommendation algorithm based on community detection of movie network and ranking of movie score. Intuitively, the result will be a good movie fitting people with similar taste.
+##1.4 Recomendation Algorithm 1:
+  
+ This recommendation algorithm based on community detection of movie network and ranking of movie score. Intuitively, the result will be a good movie fitting people with similar taste.
   
   Advantage:
   1. considered attention of movies from people with similar taste
@@ -154,9 +164,10 @@ sizes(fc)
   
   Disadvantage:
   1. didn't consider past watching experience of the user
-  
-Input:
+  2. didn't include randomness into recommendation
+
 ```{r input}
+# input
 movie_name='American Werewolf in London [VHS]'
 ```
 
@@ -186,4 +197,4 @@ op=data.frame(cbind(recommend_list,score))
 op<-op[order(op$score,decreasing=TRUE),]
 op[1:3,]
 ```
-
+Output: top3 movies and their corresponding scores
