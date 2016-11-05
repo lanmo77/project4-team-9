@@ -8,7 +8,7 @@ Yusen Wang (yw2812@columbia.edu)
 Yibo Zhu (yz2864@columbia.edu)  
 Jadie Zuo (xz2467@columbia.edu)  
  
-Presentation (https://prezi.com/jsanool9k4pc/present/?auth_key=evoswb0&follow=-syledjmbovn)
+Presentation (https://prezi.com/jsanool9k4pc/movie-experts-analysis/)
 
 
 Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by [RICH FITZJOHN](http://nicercode.github.io/about/#Team) (@richfitz). This folder is orgarnized as follows.
